@@ -9,6 +9,7 @@ import { submitOrder } from '../services/orders';
 import type { ShippingType } from '../types/order';
 import { OrderSummary } from './OrderSummary';
 import { Section } from './Section';
+import { trackMetaPixel } from '../lib/metaPixel';
 
 const schema = z.object({
   name: z.string().min(2, 'الاسم الكامل مطلوب'),
@@ -101,6 +102,13 @@ export function OrderForm() {
         price: product.price,
         total,
         date: new Date().toISOString(),
+      });
+      trackMetaPixel('Purchase', {
+        content_name: product.title,
+        content_ids: ['cocote-4-litre-bbf'],
+        content_type: 'product',
+        value: total,
+        currency: 'DZD',
       });
       setShowSuccess(true);
       setToast('تم إرسال الطلب بنجاح');
