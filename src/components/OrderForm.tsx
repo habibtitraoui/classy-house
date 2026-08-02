@@ -3,9 +3,10 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { LoaderCircle, Minus, Plus, X } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { product, shippingOptions } from '../data';
+import { product } from '../data';
 import { communesByWilaya, wilayas } from '../locations';
 import { submitOrder } from '../services/orders';
+import { fallbackShippingPrices, getShippingPrices } from '../services/shipping';
 import type { ShippingType } from '../types/order';
 import { OrderSummary } from './OrderSummary';
 import { Section } from './Section';
@@ -65,6 +66,8 @@ function SelectField({
 export function OrderForm() {
   const [quantity, setQuantity] = useState(1);
   const [shippingType, setShippingType] = useState<ShippingType>('home');
+  const [shippingPrices, setShippingPrices] = useState(fallbackShippingPrices);
+  const [shippingLoading, setShippingLoading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [toast, setToast] = useState('');
 
@@ -78,6 +81,7 @@ export function OrderForm() {
   } = useForm<FormValues>({ resolver: zodResolver(schema), mode: 'onBlur' });
 
   const selectedWilayaName = watch('wilaya');
+  const selectedCommune = watch('commune');
   const selectedWilaya = wilayas.find((wilaya) => wilaya.name === selectedWilayaName);
   const communes = selectedWilaya ? communesByWilaya[selectedWilaya.code] ?? [] : [];
 
@@ -85,13 +89,46 @@ export function OrderForm() {
     setValue('commune', '');
   }, [selectedWilayaName, setValue]);
 
+  useEffect(() => {
+    if (!selectedWilaya || !selectedCommune) {
+      setShippingPrices(fallbackShippingPrices);
+      setShippingLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+    setShippingLoading(true);
+
+    getShippingPrices(String(selectedWilaya.code), selectedCommune)
+      .then((prices) => {
+        if (!cancelled) {
+          setShippingPrices(prices);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setShippingPrices(fallbackShippingPrices);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setShippingLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedWilaya, selectedCommune]);
+
+  const activeShippingPrice = shippingPrices[shippingType];
   const total = useMemo(
-    () => product.price * quantity + shippingOptions[shippingType].price,
-    [quantity, shippingType],
+    () => product.price * quantity + activeShippingPrice,
+    [quantity, activeShippingPrice],
   );
 
   const onSubmit = async (values: FormValues) => {
-    const shippingPrice = shippingOptions[shippingType].price;
+    const shippingPrice = activeShippingPrice;
     try {
       await submitOrder({
         ...values,
@@ -218,7 +255,13 @@ export function OrderForm() {
             </button>
           </form>
 
-          <OrderSummary quantity={quantity} shippingType={shippingType} onShippingChange={setShippingType} />
+          <OrderSummary
+            quantity={quantity}
+            shippingType={shippingType}
+            shippingPrices={shippingPrices}
+            shippingLoading={shippingLoading}
+            onShippingChange={setShippingType}
+          />
         </div>
       </div>
 

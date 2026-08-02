@@ -20,7 +20,7 @@ export async function getShippingPrices(
   const params = new URLSearchParams({
     toWilayaId: String(Number.parseInt(wilayaCode, 10)),
     commune,
-    fromWilayaId,
+    fromWilayaId: fromWilayaId || '30',
   });
 
   const response = await fetch(`/api/shipping-fees?${params.toString()}`);

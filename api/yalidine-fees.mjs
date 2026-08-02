@@ -37,6 +37,22 @@ function normalize(value) {
     .replace(/[^a-z0-9]+/g, '');
 }
 
+function buildCommuneAliases(value) {
+  const normalized = String(value ?? '').trim();
+  if (!normalized) return [];
+
+  const base = normalize(normalized);
+  const aliases = new Set([base]);
+
+  const withoutArticle = normalized.replace(/^(ال|ل)/u, '').trim();
+  if (withoutArticle) aliases.add(normalize(withoutArticle));
+
+  const compact = normalized.replace(/\s+/g, '');
+  if (compact) aliases.add(normalize(compact));
+
+  return [...aliases];
+}
+
 function getNumber(value) {
   return typeof value === 'number' && Number.isFinite(value) ? value : null;
 }
@@ -50,9 +66,12 @@ function selectCommuneFees(perCommune, communeName) {
   const communes = Object.values(perCommune ?? {});
   if (communes.length === 0) return null;
 
-  const wanted = normalize(communeName);
-  const exactMatch = wanted
-    ? communes.find((commune) => normalize(commune.commune_name) === wanted || normalize(commune.name) === wanted)
+  const wantedAliases = buildCommuneAliases(communeName);
+  const exactMatch = wantedAliases.length
+    ? communes.find((commune) => {
+        const candidateAliases = buildCommuneAliases(commune.commune_name ?? commune.name);
+        return candidateAliases.some((alias) => wantedAliases.includes(alias));
+      })
     : null;
 
   const source = exactMatch ?? {};

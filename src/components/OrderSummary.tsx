@@ -1,14 +1,17 @@
 import type { ShippingType } from '../types/order';
 import { product, shippingOptions } from '../data';
+import type { ShippingPrices } from '../services/shipping';
 
 type OrderSummaryProps = {
   quantity: number;
   shippingType: ShippingType;
+  shippingPrices: ShippingPrices;
+  shippingLoading: boolean;
   onShippingChange: (shippingType: ShippingType) => void;
 };
 
-export function OrderSummary({ quantity, shippingType, onShippingChange }: OrderSummaryProps) {
-  const shippingPrice = shippingOptions[shippingType].price;
+export function OrderSummary({ quantity, shippingType, shippingPrices, shippingLoading, onShippingChange }: OrderSummaryProps) {
+  const shippingPrice = shippingPrices[shippingType];
   const subtotal = product.price * quantity;
   const total = subtotal + shippingPrice;
 
@@ -45,7 +48,7 @@ export function OrderSummary({ quantity, shippingType, onShippingChange }: Order
               />
               {shippingOptions[type].label}
             </span>
-            <span className="text-sm font-black">{shippingOptions[type].price.toLocaleString('fr-DZ')} د.ج</span>
+            <span className="text-sm font-black">{shippingPrices[type].toLocaleString('fr-DZ')} د.ج</span>
           </label>
         ))}
       </div>
@@ -55,6 +58,7 @@ export function OrderSummary({ quantity, shippingType, onShippingChange }: Order
           <span className="text-sm font-bold text-white/65">الإجمالي</span>
           <span className="text-3xl font-black text-white">{total.toLocaleString('fr-DZ')} د.ج</span>
         </div>
+        {shippingLoading && <p className="mt-2 text-xs font-semibold text-white/65">جارٍ تحديث تكلفة التوصيل...</p>}
       </div>
     </aside>
   );
