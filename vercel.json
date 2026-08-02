@@ -6,8 +6,8 @@
       "dest": "/api/$1"
     },
     {
-      "src": "^/assets/(.*)$",
-      "dest": "/assets/$1"
+      "src": "^/(assets/.*|icon\.png|favicon\.svg|favicon\.ico)$",
+      "dest": "/$1"
     },
     {
       "src": "^/(.*)$",
