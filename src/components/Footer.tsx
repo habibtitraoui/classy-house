@@ -5,7 +5,7 @@ export function Footer() {
         <div className="flex flex-col items-center gap-3 sm:items-start">
           <div className="inline-flex items-center gap-3">
             <img
-              src="/footer.png"
+              src="/footer.svg"
               alt="Classy House logo"
               className=" rounded-2xl "
             />

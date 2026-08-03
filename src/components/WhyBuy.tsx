@@ -13,7 +13,7 @@ export function WhyBuy() {
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         <div className="grid gap-4 lg:grid-cols-3">
           {reasons.map(({ title, body, icon: Icon }) => (
-            <div key={title} className="rounded-[1.5rem] bg-white p-5 text-right shadow-sm ring-1 ring-zinc-100">
+            <div key={title} className="rounded-3xl bg-white p-5 text-right shadow-sm ring-1 ring-zinc-100">
               <div className="mb-4 grid h-12 w-12 place-items-center rounded-2xl bg-zinc-950 text-white">
                 <Icon size={23} />
               </div>
