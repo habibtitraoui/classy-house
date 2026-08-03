@@ -4,7 +4,7 @@ export function Header() {
       <div className="mx-auto flex max-w-6xl items-center justify-center px-4 py-3 sm:px-6 lg:px-8">
         <a href="#" className="flex items-center gap-3" aria-label="Classy House">
           <img
-            src="/icon.png"
+            src="/icon.svg"
             alt="Classy House logo"
             className="h-10 w-10 rounded-2xl border border-zinc-200 bg-white object-cover shadow-lg shadow-zinc-200/40"
           />
